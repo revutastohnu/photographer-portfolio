@@ -1,36 +1,221 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📸 Photographer Portfolio Website
 
-## Getting Started
+Мінімалістичний сайт-портфоліо для фотографа з інтеграцією Google Calendar та Monobank оплати.
 
-First, run the development server:
+## ✨ Функції
+
+- 🎨 **Сучасний дизайн** - мінімалізм, великі заголовки, плавні анімації
+- 📅 **Google Calendar інтеграція** - автоматичне відображення вільних слотів
+- 💳 **Monobank оплата** - безпечна онлайн оплата 30% передплати
+- 📱 **Responsive** - адаптивний дизайн для всіх пристроїв
+- 🎬 **Framer Motion анімації** - плавні, Apple-like переходи
+- 🇺🇦 **Українська локалізація**
+
+## 🚀 Швидкий старт
+
+### 1. Встановлення залежностей
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Налаштування змінних середовища
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Скопіюйте `.env.local.example` в `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.local.example .env.local
+```
 
-## Learn More
+### 3. Google Calendar API
 
-To learn more about Next.js, take a look at the following resources:
+#### Крок 1: Створіть Google Cloud Project
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Перейдіть на https://console.cloud.google.com/
+2. Створіть новий проект або виберіть існуючий
+3. Увімкніть Google Calendar API:
+   - Перейдіть в "APIs & Services" > "Enable APIs and Services"
+   - Знайдіть "Google Calendar API" і увімкніть
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+#### Крок 2: Створіть Service Account
 
-## Deploy on Vercel
+1. В Google Cloud Console:
+   - "IAM & Admin" > "Service Accounts"
+   - "Create Service Account"
+2. Надайте назву (наприклад, "photographer-calendar")
+3. Створіть і завантажте JSON ключ
+4. Відкрийте JSON файл і скопіюйте:
+   - `client_email` → `GOOGLE_CLIENT_EMAIL`
+   - `private_key` → `GOOGLE_PRIVATE_KEY`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Крок 3: Налаштуйте Calendar
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Створіть новий календар на https://calendar.google.com
+2. В налаштуваннях календаря:
+   - Додайте service account email як "See all event details"
+3. Скопіюйте Calendar ID з налаштувань → `GOOGLE_CALENDAR_ID`
+
+### 4. Monobank API
+
+#### Отримання токена
+
+1. Зареєструйтесь на https://web.monobank.ua/
+2. Створіть мерчант-акаунт
+3. Отримайте API токен (X-Token)
+4. Додайте його в `.env.local` як `MONOBANK_TOKEN`
+
+#### Тестування (опціонально)
+
+Для тестування використовуйте тестовий токен з https://api.monobank.ua/
+
+### 5. Запуск
+
+```bash
+# Development
+npm run dev
+
+# Production build
+npm run build
+npm start
+```
+
+Сайт буде доступний на http://localhost:3000
+
+## 📦 Структура проекту
+
+```
+/app
+  /api
+    /availability          # Google Calendar слоти
+    /monobank
+      /create-invoice      # Створення рахунку
+      /webhook             # Обробка оплат
+  /booking
+    /success              # Success сторінка після оплати
+  layout.tsx
+  page.tsx
+
+/components
+  Navbar.tsx              # Навігація
+  Hero.tsx                # Hero секція
+  PortfolioGrid.tsx       # Сітка робіт з каруселями
+  SetModal.tsx            # Модалка з фотосесією
+  About.tsx               # Про мене
+  BookingSection.tsx      # Секція бронювання
+  BookingCalendar.tsx     # Календар вибору дати/часу
+  BookingForm.tsx         # Форма контактів
+  PaymentStep.tsx         # Крок оплати
+  CustomCursor.tsx        # Кастомний курсор
+  Footer.tsx              # Футер
+
+/content/sets             # JSON з фотосетами
+  /portrait-session
+  /wedding-editorial
+  /urban-portraits
+
+/lib
+  calendar.ts             # Google Calendar логіка
+  content.ts              # Завантаження контенту
+  monobank.types.ts       # TypeScript типи
+  types.ts                # Загальні типи
+
+/data
+  bookings.json           # Збережені бронювання (створюється автоматично)
+```
+
+## 💰 Логіка оплати
+
+### Flow бронювання
+
+1. **Користувач обирає дату/час** - з доступних слотів Google Calendar
+2. **Заповнює форму** - ім'я, email, тип зйомки, нотатки
+3. **Оплата 30%** - редірект на Monobank
+4. **Webhook обробка**:
+   - При успішній оплаті → створюється подія в Google Calendar
+   - Статус бронювання оновлюється
+   - Email підтвердження (TODO)
+5. **Success екран** - підтвердження бронювання
+
+### Ціни (можна змінити в `PaymentStep.tsx`)
+
+- Портрет: 3000 ₴
+- Пара/Лавсторі: 4000 ₴
+- Весілля: 15000 ₴
+- Editorial: 5000 ₴
+
+**Передплата:** 30% зараз
+**Залишок:** 70% після зйомки
+
+## 🎨 Додавання нових фотосетів
+
+1. Створіть папку в `/content/sets/<slug>/`
+2. Додайте `set.json`:
+
+```json
+{
+  "slug": "my-session",
+  "title": "Назва фотосесії",
+  "description": "Опис",
+  "coverImage": "/portfolio/my-session/cover.jpg"
+}
+```
+
+3. Додайте фото в `/public/portfolio/<slug>/`
+4. Оновіть масив `placeholderSets` в `PortfolioGrid.tsx`
+
+## 🛠 Налаштування
+
+### Робочі години
+
+Змініть в `lib/calendar.ts`:
+
+```typescript
+workingHours = { start: 9, end: 15 }  // 9:00-15:00
+```
+
+### Тривалість слотів
+
+```typescript
+slotDurationMinutes = 90  // 90 хвилин
+```
+
+### Кількість днів для бронювання
+
+В `api/availability/route.ts`:
+
+```typescript
+const days = parseInt(searchParams.get('days') || '21'); // 21 день вперед
+```
+
+## 🚢 Deployment
+
+### Vercel (рекомендовано)
+
+1. Push код на GitHub
+2. Підключіть репозиторій на https://vercel.com
+3. Додайте environment variables (з `.env.local`)
+4. Deploy!
+
+**Важливо:** Додайте `NEXT_PUBLIC_BASE_URL` з вашим production доменом для webhooks.
+
+### Webhooks
+
+Monobank webhook URL: `https://yourdomain.com/api/monobank/webhook`
+
+Переконайтесь, що ваш домен доступний публічно для отримання webhooks.
+
+## 📝 TODO
+
+- [ ] Email нотифікації після бронювання
+- [ ] Admin панель для перегляду бронювань
+- [ ] Інтеграція з базою даних (зараз JSON файл)
+- [ ] Можливість скасування бронювання
+- [ ] Календар в admin для блокування дат
+
+## 🤝 Підтримка
+
+Питання? Напишіть на [your-email@example.com](mailto:your-email@example.com)
+
+## 📄 Ліцензія
+
+MIT

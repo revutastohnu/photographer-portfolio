@@ -1,0 +1,15 @@
+{
+  "slug": "urban-portraits",
+  "title": "Urban Portraits",
+  "year": 2023,
+  "location": "Kyiv",
+  "tags": ["portraits", "urban", "architecture"],
+  "cover": "/portfolio/urban-portraits/cover.jpg",
+  "description": "Exploring the relationship between people and architectural spaces. Shot in brutalist buildings and contemporary urban environments around Kyiv.",
+  "gallery": [
+    "/portfolio/urban-portraits/1.jpg",
+    "/portfolio/urban-portraits/2.jpg",
+    "/portfolio/urban-portraits/3.jpg",
+    "/portfolio/urban-portraits/4.jpg"
+  ]
+}

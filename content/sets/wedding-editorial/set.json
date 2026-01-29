@@ -1,0 +1,17 @@
+{
+  "slug": "wedding-editorial",
+  "title": "Wedding Editorial",
+  "year": 2024,
+  "location": "Lviv",
+  "tags": ["weddings", "editorial", "documentary"],
+  "cover": "/portfolio/wedding-editorial/cover.jpg",
+  "description": "An intimate wedding day told through quiet, documentary moments. Focusing on connection rather than poses, capturing the day as it unfolds naturally.",
+  "gallery": [
+    "/portfolio/wedding-editorial/1.jpg",
+    "/portfolio/wedding-editorial/2.jpg",
+    "/portfolio/wedding-editorial/3.jpg",
+    "/portfolio/wedding-editorial/4.jpg",
+    "/portfolio/wedding-editorial/5.jpg",
+    "/portfolio/wedding-editorial/6.jpg"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "slug": "portrait-session",
+  "title": "Portrait Session",
+  "year": 2024,
+  "location": "Kyiv",
+  "tags": ["portraits", "natural-light", "outdoor"],
+  "cover": "/portfolio/portrait-session/cover.jpg",
+  "description": "A personal portrait session capturing authentic moments in natural light. We explored the quiet streets of Podil, finding beauty in simplicity and genuine expression.",
+  "gallery": [
+    "/portfolio/portrait-session/1.jpg",
+    "/portfolio/portrait-session/2.jpg",
+    "/portfolio/portrait-session/3.jpg",
+    "/portfolio/portrait-session/4.jpg",
+    "/portfolio/portrait-session/5.jpg"
+  ]
+}
