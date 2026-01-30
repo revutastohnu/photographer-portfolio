@@ -6,6 +6,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { generateCalendarUrl } from '@/lib/calendar-utils';
 
+// Вимикаємо static generation для цієї сторінки
+export const dynamic = 'force-dynamic';
+
 export default function BookingSuccessPage() {
   const searchParams = useSearchParams();
   const [booking, setBooking] = useState<any>(null);
