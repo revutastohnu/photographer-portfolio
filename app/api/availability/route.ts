@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFreeBusy, generateTimeSlots } from '@/lib/calendar';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,6 +14,20 @@ export async function GET(request: NextRequest) {
         { error: 'Google Calendar is not configured. Please set up environment variables.' },
         { status: 500 }
       );
+    }
+
+    // Завантажуємо робочі години з БД
+    let workingHours = { start: 9, end: 15 }; // Default
+    try {
+      const setting = await prisma.settings.findUnique({
+        where: { key: 'working_hours' },
+      });
+      if (setting) {
+        const value = JSON.parse(setting.value);
+        workingHours = value;
+      }
+    } catch (err) {
+      console.error('Failed to load working hours from DB, using defaults:', err);
     }
 
     const tomorrow = new Date();
@@ -33,8 +48,8 @@ export async function GET(request: NextRequest) {
         start: slot.start,
         end: slot.end,
       })),
-      90, // 90 хвилин (але в календарі блокується 120 хв)
-      { start: 9, end: 17 } // 9:00 - 17:00 (щоб останній слот 15:00-17:00 влізав)
+      120, // Блокуємо 2 години в календарі
+      workingHours // Використовуємо налаштування з БД
     );
 
     console.log(`Generated ${availableSlots.length} slots from ${tomorrow.toDateString()} to ${futureDate.toDateString()}`);
