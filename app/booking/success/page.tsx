@@ -1,16 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { generateCalendarUrl } from '@/lib/calendar-utils';
 
 // Вимикаємо static generation для цієї сторінки
 export const dynamic = 'force-dynamic';
 
-export default function BookingSuccessPage() {
-  const searchParams = useSearchParams();
+function BookingSuccessContent() {
   const [booking, setBooking] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -186,5 +184,20 @@ export default function BookingSuccessPage() {
         </motion.div>
       </motion.div>
     </div>
+  );
+}
+
+export default function BookingSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+          <p className="text-foreground/70">Завантаження...</p>
+        </div>
+      </div>
+    }>
+      <BookingSuccessContent />
+    </Suspense>
   );
 }
