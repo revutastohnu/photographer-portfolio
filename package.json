@@ -10,8 +10,7 @@
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
-    "postinstall": "prisma generate"
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
   },
   "dependencies": {
     "@prisma/client": "^7.3.0",
