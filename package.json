@@ -6,11 +6,12 @@
   "author": "Alina Gnusina",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^7.3.0",
