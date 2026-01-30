@@ -31,3 +31,39 @@ model Booking {
   @@index([selectedSlot])
   @@map("bookings")
 }
+
+model Settings {
+  id    String @id @default("default")
+  key   String @unique
+  value String // JSON string
+  
+  @@map("settings")
+}
+
+model SessionType {
+  id            String @id @default(uuid())
+  name          String
+  nameUk        String
+  price         Int    // в копійках
+  depositPercent Int   @default(30) // відсоток передплати
+  duration      Int    @default(120) // тривалість в хвилинах
+  description   String?
+  isActive      Boolean @default(true)
+  order         Int    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("session_types")
+}
+
+model VacationBlock {
+  id        String   @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime
+  reason    String?
+  calendarEventId String? // ID події в Google Calendar
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("vacation_blocks")
+}
