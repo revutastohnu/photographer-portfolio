@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MonobankInvoiceRequest, MonobankInvoiceResponse } from '@/lib/monobank.types';
+import { google } from 'googleapis';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -115,36 +117,20 @@ export async function POST(request: NextRequest) {
       console.error('❌ Failed to create calendar event:', calendarError);
     }
 
-    // Зберігаємо бронювання
-    const fs = require('fs');
-    const path = require('path');
-    const bookingsPath = path.join(process.cwd(), 'data', 'bookings.json');
-
-    // Створюємо папку data якщо її немає
-    const dataDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    // Читаємо існуючі бронювання
-    let bookings = [];
-    if (fs.existsSync(bookingsPath)) {
-      const data = fs.readFileSync(bookingsPath, 'utf-8');
-      bookings = JSON.parse(data);
-    }
-
-    // Додаємо нове бронювання
-    const newBooking = {
-      id: invoiceResponse.invoiceId,
-      invoiceId: invoiceResponse.invoiceId,
-      ...bookingData,
-      status: 'pending',
-      amount: amount,
-      createdAt: new Date().toISOString(),
-    };
-
-    bookings.push(newBooking);
-    fs.writeFileSync(bookingsPath, JSON.stringify(bookings, null, 2));
+    // Зберігаємо бронювання в БД
+    await prisma.booking.create({
+      data: {
+        invoiceId: invoiceResponse.invoiceId,
+        name: bookingData.name,
+        email: bookingData.email,
+        phone: bookingData.phone || null,
+        sessionType: bookingData.sessionType,
+        selectedSlot: new Date(bookingData.selectedSlot),
+        note: bookingData.note || null,
+        status: 'pending',
+        amount: amount,
+      },
+    });
 
     return NextResponse.json({
       success: true,

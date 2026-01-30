@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MonobankWebhookPayload } from '@/lib/monobank.types';
 import { google } from 'googleapis';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,30 +9,19 @@ export async function POST(request: NextRequest) {
     
     console.log('Monobank webhook received:', webhook);
 
-    const fs = require('fs');
-    const path = require('path');
-    const bookingsPath = path.join(process.cwd(), 'data', 'bookings.json');
+    // Знаходимо бронювання в БД
+    const booking = await prisma.booking.findUnique({
+      where: { invoiceId: webhook.invoiceId },
+    });
 
-    // Читаємо бронювання
-    if (!fs.existsSync(bookingsPath)) {
-      return NextResponse.json({ error: 'Bookings file not found' }, { status: 404 });
-    }
-
-    const data = fs.readFileSync(bookingsPath, 'utf-8');
-    const bookings = JSON.parse(data);
-
-    // Знаходимо бронювання
-    const bookingIndex = bookings.findIndex((b: any) => b.invoiceId === webhook.invoiceId);
-    if (bookingIndex === -1) {
+    if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
-    const booking = bookings[bookingIndex];
-
     // Оновлюємо статус
+    let updatedBooking = booking;
+    
     if (webhook.status === 'success') {
-      booking.status = 'paid';
-      booking.paidAt = new Date().toISOString();
 
       // Створюємо подію в Google Calendar
       try {
@@ -71,26 +61,33 @@ export async function POST(request: NextRequest) {
           },
         };
 
-        const calendarResponse = await calendar.events.insert({
+        await calendar.events.insert({
           calendarId: process.env.GOOGLE_CALENDAR_ID,
           requestBody: event,
         });
 
-        booking.calendarEventId = calendarResponse.data.id;
-        console.log('Google Calendar event created:', calendarResponse.data.id);
+        console.log('Google Calendar event created');
       } catch (calendarError) {
         console.error('Failed to create calendar event:', calendarError);
         // Не падаємо, якщо календар не створився
       }
-    } else if (webhook.status === 'failure') {
-      booking.status = 'failed';
-    } else if (webhook.status === 'expired') {
-      booking.status = 'expired';
-    }
 
-    // Зберігаємо оновлення
-    bookings[bookingIndex] = booking;
-    fs.writeFileSync(bookingsPath, JSON.stringify(bookings, null, 2));
+      // Оновлюємо статус в БД
+      updatedBooking = await prisma.booking.update({
+        where: { id: booking.id },
+        data: { status: 'paid' },
+      });
+    } else if (webhook.status === 'failure') {
+      updatedBooking = await prisma.booking.update({
+        where: { id: booking.id },
+        data: { status: 'failed' },
+      });
+    } else if (webhook.status === 'expired') {
+      updatedBooking = await prisma.booking.update({
+        where: { id: booking.id },
+        data: { status: 'expired' },
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
