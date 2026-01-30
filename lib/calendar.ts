@@ -47,7 +47,7 @@ export function generateTimeSlots(
   endDate: Date,
   busySlots: Array<{ start: string; end: string }>,
   slotDurationMinutes = 120, // Блокуємо 2 години в календарі
-  workingHours = { start: 9, end: 16 }
+  workingHours = { start: 9, end: 15 } // end = остання година коли МОЖЕ ПОЧАТИСЯ зйомка
 ): TimeSlot[] {
   const slots: TimeSlot[] = [];
   const currentDate = new Date(startDate);
@@ -62,8 +62,8 @@ export function generateTimeSlots(
       continue;
     }
 
-    // Generate slots for the day - кожну годину
-    for (let hour = workingHours.start; hour < workingHours.end; hour++) {
+    // Generate slots for the day - кожну годину (включно з end)
+    for (let hour = workingHours.start; hour <= workingHours.end; hour++) {
       const slotStart = new Date(currentDate);
       slotStart.setHours(hour, 0, 0, 0);
 
