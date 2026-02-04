@@ -157,13 +157,13 @@ export default function PortfolioPage() {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('sessionSlug', formData.slug || 'uploads');
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+        uploadFormData.append('sessionSlug', formData.slug || 'uploads');
 
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
-          body: formData,
+          body: uploadFormData,
         });
 
         if (uploadResponse.ok) {
