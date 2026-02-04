@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
           },
         ],
       },
-      redirectUrl: `http://localhost:3000/booking/success`, // Завжди на localhost для зручності
+      redirectUrl: `${baseUrl}/booking/success`,
       webHookUrl: `${baseUrl}/api/monobank/webhook`, // Ngrok для webhook
       validity: 3600, // 1 година
       paymentType: 'debit',
