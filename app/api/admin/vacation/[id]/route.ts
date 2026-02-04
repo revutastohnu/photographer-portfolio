@@ -4,12 +4,13 @@ import { google } from 'googleapis';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Знаходимо vacation
     const vacation = await prisma.vacationBlock.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!vacation) {
@@ -49,7 +50,7 @@ export async function DELETE(
 
     // Видаляємо з БД
     await prisma.vacationBlock.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
