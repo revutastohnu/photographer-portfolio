@@ -64,6 +64,42 @@ model VacationBlock {
   calendarEventId String? // ID події в Google Calendar
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("vacation_blocks")
+}
+
+model PhotoSession {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  titleUk     String
+  year        Int
+  location    String
+  locationUk  String
+  description String?
+  descriptionUk String?
+  tags        String[] // Array тегів
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  images      PhotoSessionImage[]
+
+  @@index([isActive, order])
+  @@map("photo_sessions")
+}
+
+model PhotoSessionImage {
+  id          String       @id @default(uuid())
+  sessionId   String
+  session     PhotoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  url         String       // Шлях до файлу або URL
+  fileName    String       // Оригінальна назва файлу
+  alt         String?
+  order       Int
+  isCover     Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+  @@index([sessionId, order])
+  @@map("photo_session_images")
 }

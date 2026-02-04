@@ -32,6 +32,7 @@ export default function AdminDashboard() {
   }
 
   const menuItems = [
+    { title: 'Портфоліо', href: '/admin/dashboard/portfolio', icon: '🖼️' },
     { title: 'Робочі години', href: '/admin/dashboard/working-hours', icon: '🕐' },
     { title: 'Типи зйомок', href: '/admin/dashboard/session-types', icon: '📸' },
     { title: 'Відпустка / Блокування дат', href: '/admin/dashboard/vacation', icon: '🏖️' },

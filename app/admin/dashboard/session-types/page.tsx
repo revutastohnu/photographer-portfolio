@@ -92,6 +92,26 @@ export default function SessionTypesPage() {
     }
   };
 
+  const handleToggleActive = async (type: SessionType) => {
+    try {
+      const response = await fetch(`/api/admin/session-types/${type.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...type, isActive: !type.isActive }),
+      });
+
+      if (response.ok) {
+        loadSessionTypes();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Помилка при зміні статусу');
+      }
+    } catch (err) {
+      console.error('Failed to toggle active status:', err);
+      alert('Помилка при зміні статусу');
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Видалити цей тип зйомки?')) return;
 
@@ -102,9 +122,13 @@ export default function SessionTypesPage() {
 
       if (response.ok) {
         loadSessionTypes();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Помилка при видаленні');
       }
     } catch (err) {
       console.error('Failed to delete:', err);
+      alert('Помилка при видаленні');
     }
   };
 
@@ -265,6 +289,17 @@ export default function SessionTypesPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <button
+                      onClick={() => handleToggleActive(type)}
+                      className={`px-4 py-2 rounded-xl transition-colors ${
+                        type.isActive
+                          ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30'
+                          : 'bg-gray-500/20 text-gray-500 hover:bg-gray-500/30'
+                      }`}
+                      title={type.isActive ? 'Деактивувати' : 'Активувати'}
+                    >
+                      {type.isActive ? '✓ Активний' : '✗ Вимкнений'}
+                    </button>
                     <button
                       onClick={() => handleEdit(type)}
                       className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10"

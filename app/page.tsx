@@ -6,10 +6,25 @@ import PortfolioGrid from '@/components/PortfolioGrid';
 import About from '@/components/About';
 import BookingSection from '@/components/BookingSection';
 import Footer from '@/components/Footer';
-import { getAllPhotoSets } from '@/lib/content';
+import { PhotoSession } from '@/lib/types';
 
-function PortfolioGridWrapper() {
-  const sets = getAllPhotoSets();
+async function PortfolioGridWrapper() {
+  let sets: PhotoSession[] = [];
+
+  try {
+    // Завантажуємо дані з API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/portfolio`, {
+      next: { revalidate: 60 }, // Кешуємо на 60 секунд
+    });
+
+    if (response.ok) {
+      sets = await response.json();
+    }
+  } catch (error) {
+    console.error('Failed to load portfolio:', error);
+  }
+
   return <PortfolioGrid sets={sets} />;
 }
 

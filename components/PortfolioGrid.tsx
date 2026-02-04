@@ -2,43 +2,21 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { PhotoSet } from '@/lib/types';
+import { PhotoSession } from '@/lib/types';
 import SetModal from './SetModal';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 interface PortfolioGridProps {
-  sets: PhotoSet[];
+  sets: PhotoSession[];
 }
-
-// Placeholder images для кожного сету (по 4-5 фото)
-const placeholderSets = [
-  [
-    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&h=1000&fit=crop',
-  ],
-  [
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=800&h=1000&fit=crop',
-  ],
-  [
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=800&h=1000&fit=crop',
-  ],
-];
 
 function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boolean }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (!isHovered) return;
-    
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
     }, 2000); // Змінюємо кожні 2 секунди
@@ -54,8 +32,8 @@ function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boo
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ 
-            duration: 1.2, 
+          transition={{
+            duration: 1.2,
             ease: [0.16, 1, 0.3, 1]
           }}
           className="absolute inset-0"
@@ -71,7 +49,7 @@ function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boo
       </AnimatePresence>
 
       {/* Індикатори */}
-      {isHovered && (
+      {isHovered && images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
           {images.map((_, idx) => (
             <motion.div
@@ -91,7 +69,7 @@ function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boo
 }
 
 export default function PortfolioGrid({ sets }: PortfolioGridProps) {
-  const [selectedSet, setSelectedSet] = useState<PhotoSet | null>(null);
+  const [selectedSet, setSelectedSet] = useState<PhotoSession | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -106,7 +84,7 @@ export default function PortfolioGrid({ sets }: PortfolioGridProps) {
     }
   }, [searchParams, sets]);
 
-  const openSetModal = (set: PhotoSet) => {
+  const openSetModal = (set: PhotoSession) => {
     setSelectedSet(set);
     router.push(`?set=${set.slug}`, { scroll: false });
   };
@@ -120,8 +98,12 @@ export default function PortfolioGrid({ sets }: PortfolioGridProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {sets.map((set, index) => {
-          const images = placeholderSets[index % placeholderSets.length];
+          // Використовуємо реальні фото з сесії
+          const images = set.images.map(img => img.url);
           const isHovered = hoveredIndex === index;
+
+          // Якщо немає фото, пропускаємо цю сесію
+          if (images.length === 0) return null;
 
           return (
             <motion.button
@@ -148,8 +130,9 @@ export default function PortfolioGrid({ sets }: PortfolioGridProps) {
                 transition={{ duration: 0.6, delay: index * 0.15 + 0.2 }}
               >
                 <h3 className="text-2xl md:text-3xl font-light tracking-tight">
-                  {set.title}
+                  {set.titleUk}
                 </h3>
+                <p className="text-sm text-foreground/60 mt-1">{set.year} • {set.locationUk}</p>
               </motion.div>
 
               {/* Карусель фото */}

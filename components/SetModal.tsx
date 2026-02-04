@@ -2,21 +2,13 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
-import { PhotoSet } from '@/lib/types';
+import { PhotoSession } from '@/lib/types';
 import Image from 'next/image';
 
 interface SetModalProps {
-  set: PhotoSet | null;
+  set: PhotoSession | null;
   onClose: () => void;
 }
-
-const placeholderGallery = [
-  'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&h=1600&fit=crop',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1200&h=1600&fit=crop',
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=1200&h=800&fit=crop',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=1600&fit=crop',
-];
 
 export default function SetModal({ set, onClose }: SetModalProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -47,7 +39,7 @@ export default function SetModal({ set, onClose }: SetModalProps) {
 
     const handleTab = (e: KeyboardEvent) => {
       if (!modalRef.current || !set) return;
-      
+
       if (e.key === 'Tab') {
         const focusableElements = modalRef.current.querySelectorAll(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -67,7 +59,7 @@ export default function SetModal({ set, onClose }: SetModalProps) {
 
     window.addEventListener('keydown', handleEsc);
     window.addEventListener('keydown', handleTab);
-    
+
     return () => {
       window.removeEventListener('keydown', handleEsc);
       window.removeEventListener('keydown', handleTab);
@@ -152,15 +144,33 @@ export default function SetModal({ set, onClose }: SetModalProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    {set.title}
+                    {set.titleUk}
                   </motion.h2>
+                  <motion.p
+                    className="text-lg text-foreground/60 mt-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                  >
+                    {set.year} • {set.locationUk}
+                  </motion.p>
+                  {set.descriptionUk && (
+                    <motion.p
+                      className="text-base text-foreground/80 mt-6 max-w-2xl mx-auto"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.4 }}
+                    >
+                      {set.descriptionUk}
+                    </motion.p>
+                  )}
                 </div>
 
-                {/* Gallery - Masonry style */}
-                <div className="columns-1 md:columns-2 gap-6 space-y-6 mb-16">
-                  {placeholderGallery.map((image, index) => (
+                {/* Gallery - Adaptive Masonry */}
+                <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 md:gap-6 space-y-4 md:space-y-6 mb-16">
+                  {set.images.map((image, index) => (
                     <motion.div
-                      key={index}
+                      key={image.id}
                       className="break-inside-avoid"
                       initial={{ opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -176,10 +186,10 @@ export default function SetModal({ set, onClose }: SetModalProps) {
                           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                         >
                           <Image
-                            src={image}
-                            alt={`${set.title} image ${index + 1}`}
+                            src={image.url}
+                            alt={image.alt || `${set.titleUk} ${index + 1}`}
                             width={1200}
-                            height={index % 2 === 0 ? 1600 : 800}
+                            height={1200}
                             className="w-full h-auto"
                             unoptimized
                           />
@@ -202,7 +212,7 @@ export default function SetModal({ set, onClose }: SetModalProps) {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <span className="relative z-10">Book this style</span>
+                    <span className="relative z-10">Забронювати цей стиль</span>
                     <motion.div
                       className="absolute inset-0 bg-foreground/80"
                       initial={{ x: '-100%' }}
