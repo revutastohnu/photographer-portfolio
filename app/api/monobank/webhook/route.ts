@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MonobankWebhookPayload } from '@/lib/monobank.types';
 import { google } from 'googleapis';
 import { prisma } from '@/lib/prisma';
+import { telegramBot } from '@/lib/telegram';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,6 +71,21 @@ export async function POST(request: NextRequest) {
       } catch (calendarError) {
         console.error('Failed to create calendar event:', calendarError);
         // Не падаємо, якщо календар не створився
+      }
+
+      // Відправляємо сповіщення в Telegram
+      try {
+        const telegramMessage = telegramBot.formatPaymentNotification({
+          name: booking.name,
+          sessionType: booking.sessionType,
+          selectedSlot: new Date(booking.selectedSlot),
+          amount: booking.amount,
+        });
+
+        await telegramBot.sendMessage(telegramMessage);
+      } catch (telegramError) {
+        console.error('Failed to send Telegram notification:', telegramError);
+        // Не падаємо, якщо сповіщення не відправилось
       }
 
       // Оновлюємо статус в БД

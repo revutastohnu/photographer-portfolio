@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MonobankInvoiceRequest, MonobankInvoiceResponse } from '@/lib/monobank.types';
 import { google } from 'googleapis';
 import { prisma } from '@/lib/prisma';
+import { telegramBot } from '@/lib/telegram';
 
 export async function POST(request: NextRequest) {
   try {
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Зберігаємо бронювання в БД
-    await prisma.booking.create({
+    const booking = await prisma.booking.create({
       data: {
         invoiceId: invoiceResponse.invoiceId,
         name: bookingData.name,
@@ -131,6 +132,26 @@ export async function POST(request: NextRequest) {
         amount: amount,
       },
     });
+
+    // Відправляємо сповіщення про нове бронювання в Telegram
+    try {
+      const telegramMessage = telegramBot.formatBookingNotification({
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone || undefined,
+        sessionType: booking.sessionType,
+        selectedSlot: new Date(booking.selectedSlot),
+        note: booking.note || undefined,
+        amount: booking.amount,
+        status: booking.status,
+      });
+
+      await telegramBot.sendMessage(telegramMessage);
+      console.log('✅ Telegram notification sent');
+    } catch (telegramError) {
+      console.error('❌ Failed to send Telegram notification:', telegramError);
+      // Не падаємо, якщо сповіщення не відправилось
+    }
 
     return NextResponse.json({
       success: true,
